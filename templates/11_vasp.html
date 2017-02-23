@@ -1,0 +1,333 @@
+{% extends "02_header.html" %}
+{% block body %}
+<!-- Banner swiper format -->
+<div class="visual swiper-container">
+    <div class="swiper-wrapper">
+        <div style="background-image:url('/static/images/main/slider1.jpg');" class="swiper-slide">
+            <div>
+                <div>
+                    <h1>VASP</h1>
+                    <p>You can make VASP input sets easily.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>	<!-- /VISUAL -->
+
+<style type="text/css">
+.swiper-container {
+    width: 100%;
+    height: 300px;
+    }
+.choose_option ul li a{
+    font-size: 20px;
+    color: #B1B1B1;
+}
+.choose_option h1 {
+    margin-top:35px;
+}
+.choose_option .tab-pane {
+    min-height: 700px;
+}
+.radio_menu ul li {
+    line-height: 30px;
+}
+.radio_menu .yesno li {
+    display:inline-block;
+    font-size: 20px;
+}
+.radio_menu span {
+    margin-left: 10px;
+}
+
+</style>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        // potential add button
+        $("#plus_btn").click(function() {
+			$("#add_potential").append('<input type="text" class="form-control" name="vasp_atom_potential" style="width:120px; margin:5px 0 5px 0;">');
+		});
+
+        // deactivate dft-d2, ldau, kpts
+        $("#LVDW").attr("disabled",true);
+        $("#VDW_RADIUS").attr("disabled",true);
+        $("#VDW_SCALING").attr("disabled",true);
+        $("#VDW_D").attr("disabled",true);
+        $("#LDAU").attr("disabled",true);
+        $("#LMAXMIX").attr("disabled",true);
+        $("#LDAUTYPE").attr("disabled",true);
+        $("#kpt_a").attr("disabled",true);
+        $("#kpt_b").attr("disabled",true);
+        $("#kpt_c").attr("disabled",true);
+
+		var getSelectedRadios = function (groupName) {
+			//$("input").css('border', '1px solid lightgray');
+			var result = $('input[name="' + groupName + '"]:checked');
+
+			// single point
+			if (result.val() == "sp") {
+				$("#NSW").val("0");
+				$("#NSW").css('border', '1px solid red');
+			} else if (result.val() == "nosp") {
+				$("#NSW").val("200");
+				$("#NSW").css('border', '1px solid red');
+			}
+
+			// spin
+			if (result.val() == "spin") {
+				$("#ISPIN").val("2");
+				$("#ISPIN").css('border', '1px solid red');
+			} else if (result.val() == "nospin") {
+				$("#ISPIN").val("1");
+				$("#ISPIN").css('border', '1px solid red');
+			}
+
+			// dft-d2
+			if (result.val() == "grimme") {
+				$("#LVDW").val(".TRUE.");
+				$("#LVDW").css('border', '1px solid red');
+				$("#VDW_RADIUS").css('border', '1px solid red');
+                $("#VDW_SCALING").css('border', '1px solid red');
+                $("#VDW_D").css('border', '1px solid red');
+				$("#LVDW").attr("disabled",false);
+                $("#VDW_RADIUS").attr("disabled",false);
+                $("#VDW_SCALING").attr("disabled",false);
+                $("#VDW_D").attr("disabled",false);
+			} else if (result.val() == "nogrimme") {
+				$("#LVDW").val(".FALSE.");
+				$("#LVDW").attr("disabled",true);
+                $("#VDW_RADIUS").attr("disabled",true);
+                $("#VDW_SCALING").attr("disabled",true);
+                $("#VDW_D").attr("disabled",true);
+			}
+
+			// LDA+U
+			if (result.val() == "ldau") {
+				$("#LDAU").val(".TRUE.");
+				$("#LDAU").css('border', '1px solid red');
+				$("#LMAXMIX").css('border', '1px solid red');
+                $("#LDAUTYPE").css('border', '1px solid red');
+                $("#LDAU").attr("disabled",false);
+				$("#LMAXMIX").attr("disabled",false);
+                $("#LDAUTYPE").attr("disabled",false);
+			} else if (result.val() == "noldau") {
+				$("#LDAU").val(".FALSE.");
+				$("#LDAU").css('border', '1px solid red');
+				$("#LDAU").attr("disabled",true);
+				$("#LMAXMIX").attr("disabled",true);
+                $("#LDAUTYPE").attr("disabled",true);
+			}
+
+			// kpoints
+			if (result.val() == "kpts") {
+                $("#kpt_a").attr("disabled",false);
+				$("#kpt_b").attr("disabled",false);
+                $("#kpt_c").attr("disabled",false);
+			} else if (result.val() == "nokpts") {
+				$("#kpt_a").attr("disabled",true);
+				$("#kpt_b").attr("disabled",true);
+                $("#kpt_c").attr("disabled",true);
+			}
+		};
+
+		// sp click
+		$('input[name="sp"]').click(function () {
+			getSelectedRadios('sp');
+		});
+		// spin click
+		$('input[name="spin"]').click(function () {
+			getSelectedRadios('spin');
+		});
+		// grimme click
+		$('input[name="grimme"]').click(function () {
+			getSelectedRadios('grimme');
+		});
+		// ldau click
+		$('input[name="ldau"]').click(function () {
+			getSelectedRadios('ldau');
+		});
+		// ldau click
+		$('input[name="kpts"]').click(function () {
+			getSelectedRadios('kpts');
+		});
+    });
+</script>
+
+<div class="separated_container">
+    <div class="left_menu">
+        <ul class="left_menu_ul">
+            <a class="left_menu_link" href="/vasp" id="current_left_menu"><li>Input Maker</li></a>
+            <a class="left_menu_link" href="/vaspout"><li>Output Analyzer</li></a>
+            <a class="left_menu_link" href="/vaspjobs"><li>Job Tracker</li></a>
+        </ul>
+    </div>
+    <div class="right_section">
+        <!--1. Upload file-->
+        <div class="file_upload">
+            <h1 class="medium_title">1. Upload your structure file(s).</h1>
+            <p class="small_description">*.cif, *.xsd, POSCAR types are available.</p>
+
+            <form action="vasp_upload" method="post" enctype="multipart/form-data">
+                <input type="file" class="filestyle" multiple="" name="file[]" >
+                <input type="text" id="jobname_input" class="form-control" placeholder="Job name : This value will be the directory name" name="jobname">
+                <input class="btn btn-default" type="submit" value="Load Files" id="file_submit_btn">
+            </form>
+        </div><br><br>
+
+        <!--2. Choose options-->
+        <div class="choose_option">
+            <h1 class="medium_title">2. Select input options.</h1>
+            <!-- Nav tabs -->
+            <ul class="nav nav-tabs" role="tablist">
+                <li role="presentation" class="active"><a href="#jobinfo" aria-controls="jobinfo" role="tab" data-toggle="tab">Job info</a></li>
+                <li role="presentation"><a href="#incar" aria-controls="incar" role="tab" data-toggle="tab">INCAR</a></li>
+                <li role="presentation"><a href="#kpoints" aria-controls="kpoints" role="tab" data-toggle="tab">KPOINTS</a></li>
+                <li role="presentation"><a href="#potcar" aria-controls="potcar" role="tab" data-toggle="tab">POTCAR</a></li>
+            </ul>
+            <!-- Tab panels -->
+            <div class="tab-content">
+                <!--job info-->
+                <div role="tabpanel" class="tab-pane fade in active" id="jobinfo">
+                    <h1 class="small_title">Job name</h1>
+                    <p class="small_description">TiO2</p>
+
+                    <h1 class="small_title">Uploaded files</h1>
+                    <p class="small_description">TiO2.cif</p>
+                    <p class="small_description">LiNiO2.cif</p>
+
+                    <h1 class="small_title">Directory path</h1>
+                    <input type="text" id="target_path" name="target_path" class="form-control" style="width: 100%" value="~/QuantumEngine/VASP/jobname" placeholder="Full directory path of your server">
+                </div>
+                <!--incar-->
+                <div role="tabpanel" class="tab-pane fade" id="incar">
+                    <!--specific options-->
+                    <h1 class="small_title">Specific options</h1>
+                    <table>
+                        <!--Single point-->
+                        <tr>
+                            <td style="width:300px"><p class="small_description">Single point</p></td>
+                            <td>
+                                <div class="radio_menu">
+                                    <ul class="yesno">
+                                        <li><input type="radio" name="sp" class="sp" value="sp"><span class="small_description">Yes</span></li>
+                                        <li><input type="radio" name="sp" class="sp" value="nosp" style="margin-left:20px;" checked><span class="small_description">No</span></li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                        <!--Spin-->
+                        <tr>
+                            <td style="width:300px"><p class="small_description">Spin polarized</p></td>
+                            <td>
+                                <div class="radio_menu">
+                                    <ul class="yesno">
+                                        <li><input type="radio" name="spin" class="spin" value="spin"><span class="small_description">Yes</span></li>
+                                        <li><input type="radio" name="spin" class="spin" value="nospin" style="margin-left:20px;" checked><span class="small_description">No</span></li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                        <!--DFT-D2-->
+                        <tr>
+                            <td style="width:300px"><p class="small_description">DFT-D2 (Grimme's function)</p></td>
+                            <td>
+                                <div class="radio_menu">
+                                    <ul class="yesno">
+                                        <li><input type="radio" name="grimme" class="grimme" value="grimme"><span class="small_description">Yes</span></li>
+                                        <li><input type="radio" name="grimme" class="grimme" value="nogrimme" style="margin-left:20px;" checked><span class="small_description">No</span></li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                        <!--MAGMOM-->
+                        <tr>
+                            <td style="width:300px"><p class="small_description">Magnetic moment</p></td>
+                            <td>
+                                <div class="radio_menu">
+                                    <ul class="yesno">
+                                        <li><input type="radio" name="magmom" class="magmom" value="magmom"><span class="small_description">Yes</span></li>
+                                        <li><input type="radio" name="magmom" class="magmom" value="nomagmom" style="margin-left:20px;" checked><span class="small_description">No</span></li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                        <!--LDA+U-->
+                        <tr>
+                            <td style="width:300px"><p class="small_description">LDA +U</p></td>
+                            <td>
+                                <div class="radio_menu">
+                                    <ul class="yesno">
+                                        <li><input type="radio" name="ldau" class="ldau" value="ldau"><span class="small_description">Yes</span></li>
+                                        <li><input type="radio" name="ldau" class="ldau" value="noldau" style="margin-left:20px;" checked><span class="small_description">No</span></li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <!--advance incar options-->
+                    <h1 class="small_title">Advance</h1>
+                    {% for key in incar_keys %}
+                    <table>
+                        <tr style="height:40px;">
+                            <td style="width:200px"><p class="small_description">{{key}}</p></td>
+                            <td><input type="text" id="{{key}}" name="{{key}}" class="form-control" style="width: 100%" value="{{ incar_dict[key] }}"></td>
+                        </tr>
+                    </table>
+                    {% endfor %}
+                </div>
+                <!--kpoints-->
+                <div role="tabpanel" class="tab-pane fade" id="kpoints">
+                    <h1 class="small_title">Use k-points as default</h1>
+                    <p class="small_description">Default : (cell length / 20 Angstrom).</p>
+                    <table>
+                        <!--kpoints-->
+                        <tr>
+                            <td style="width:300px"><p class="small_description">I want to use k-points manually.</p></td>
+                            <td>
+                                <div class="radio_menu">
+                                    <ul class="yesno">
+                                        <li><input type="radio" name="kpts" class="kpts" value="kpts"><span class="small_description">Yes</span></li>
+                                        <li><input type="radio" name="kpts" class="kpts" value="nokpts" style="margin-left:20px;" checked><span class="small_description">No</span></li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                    <h1 class="small_title">User selected k-points</h1>
+                    <table class="kpoints_table">
+                        <tr style="height:40px;">
+                            <td style="width:100px"><p class="small_description">a</p></td>
+                            <td style="width:100px"><p class="small_description">b</p></td>
+                            <td style="width:100px"><p class="small_description">c</p></td>
+                        </tr>
+                        <tr style="height:40px;">
+                            <td><input type="text" id="kpt_a" name="kpt_a" class="form-control" style="width:70px"></td>
+                            <td><input type="text" id="kpt_b" name="kpt_b" class="form-control" style="width:70px"></td>
+                            <td><input type="text" id="kpt_c" name="kpt_c" class="form-control" style="width:70px"></td>
+                        </tr>
+                    </table>
+                </div>
+                <!--potcar-->
+                <div role="tabpanel" class="tab-pane fade" id="potcar">
+                    <h1 class="small_title">VASP potentials</h1>
+                    <div class="radio_menu">
+                        <ul>
+                            <li><input type="radio" name="vasp_potential" class="vasp_potential" value="potpaw_GGA"><span class="small_description">GGA PAW</span></li>
+                            <li><input type="radio" name="vasp_potential" class="vasp_potential" value="POT_GGA_PAW_PBE_54" checked><span class="small_description">GGA PAW PBE</span></li>
+                            <li><input type="radio" name="vasp_potential" class="vasp_potential" value="POT_LDA_PAW_54"><span class="small_description">LDA PAW</span></li>
+                        </ul>
+                    </div>
+                    <h1 class="small_title">Use specified potentials</h1>
+                    <p class="small_description"> Example below. </p>
+                    <input type="text" class="form-control" style="width:120px; margin:5px 0 5px 0;" value="Fe:Fe_sv">
+                    <div id="add_potential">
+						<button type="button" style="background-color:white;border:none" id="plus_btn"><span class="glyphicon glyphicon-plus"></span><span class="small_description"> Add</span></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

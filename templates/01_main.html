@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Quantum Engine</title>
+    <link rel="shortcut icon" href="/static/images/main/logo_icon.png">
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Noto+Sans|Open+Sans|Lato|PT+Sans|Cabin" rel="stylesheet">
+    <!-- jQuery -->
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+	<script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+    <script type="text/javascript" src="/static/js/bootstrap.min.js"></script>
+    <!-- swiper -->
+    <link rel="stylesheet" href="/static/css/swiper.min.css">
+    <link rel="stylesheet" href="/static/css/layout.css">
+    <!--QE css-->
+    <link rel="stylesheet" href="/static/css/QE.css">
+    <!--swiper css-->
+    <style type="text/css">
+        .swiper-container {
+            width: 100%;
+            height: 450px;
+            }
+        .swiper-container > div > div {
+            height: 450px;
+        }
+        .swiper-container h1 {
+            font-size: 72px;
+            line-height: 90px;
+        }
+        .swiper-container p {
+            font-size: 28px;
+        }
+	</style>
+
+</head>
+<header>
+    <!--Top menu-->
+    <div id="top_section">
+        <div id="top_container">
+            <div id="mainlogo">
+                <a href="/"><img src="/static/images/main/logo.png"></a>
+            </div>
+            <div class="sideMenu">
+                <ul class="top_ul">
+                    <li><a class="menuLink" href="/login"><span class="glyphicon glyphicon-log-in" aria-hidden="true"  data-toggle="tooltip" data-placement="top" title="Log-in"></span></a></li>
+                    <li><a class="menuLink" href="/register"><span class="glyphicon glyphicon-pencil" aria-hidden="true" data-toggle="tooltip" data-placement="top" title="Register"></span></a></li>
+                </ul>
+            </div>
+            <!--initialize tooltip-->
+            <script type="text/javascript">
+		$(function () {
+          $('[data-toggle="tooltip"]').tooltip()
+        })
+	</script>
+            <div class="topMenu" >
+                <ul class="top_ul">
+                    <li><a class="menuLink" href="/vasp">VASP</a></li>
+                    <li><a class="menuLink" href="/gaussian">Gaussian 09</a></li>
+                    <li><a class="menuLink" href="/tools">Tools</a></li>
+                    <li><a class="menuLink" href="/jobs">Jobs</a></li>
+                </ul>
+            </div>
+
+        </div>
+    </div>
+    <!--swiper-->
+    <div class="visual swiper-container">
+        <!-- 슬라이드 -->
+        <div class="swiper-wrapper">
+            <div style="background-image:url('/static/images/main/slider1.jpg');" class="swiper-slide">
+                <div>
+                    <div>
+                        <h1>Quantum Engine</h1>
+                        <p>A simple web application for computational materials science.</p>
+                    </div>
+                </div>
+            </div>
+            <div style="background-image:url('/static/images/main/slider2.jpg');" class="swiper-slide">
+                <div>
+                    <div>
+                        <h1>Generate Inputs</h1>
+                        <p>You can generate some inputfiles easily on the web.</p>
+                    </div>
+                </div>
+            </div>
+            <div style="background-image:url('/static/images/main/slider1.jpg');" class="swiper-slide">
+                <div>
+                    <div>
+                        <h1>Management Jobs</h1>
+                        <p>You can monitor jobs on the web.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+		<!-- END:슬라이드 -->
+		<div class="swiper-pagination swiper-pagination-white"></div>
+		<!--<div class="swiper-button-prev swiper-button-white"></div>-->
+		<!--<div class="swiper-button-next swiper-button-white"></div>-->
+
+	</div>	<!-- /VISUAL -->
+    <script src="/static/js/swiper.min.js"></script>
+    <!-- Initialize Swiper -->
+    <script>
+        var swiper = new Swiper('.swiper-container', {
+            pagination: '.swiper-pagination',
+            nextButton: '.swiper-button-next',
+            prevButton: '.swiper-button-prev',
+            paginationClickable: true,
+            spaceBetween: 30,
+            centeredSlides: true,
+            autoplay: 3000,
+            autoplayDisableOnInteraction: false
+        });
+    </script>
+
+</header>
+
+<body>
+
+    <div class="basic_container">
+        <h1 class="large_title">Quantum Engine</h1>
+        <button type="button" class="btn btn-default" data-toggle="tooltip" data-placement="left" title="Tooltip on left">Tooltip on left</button>
+        <p class="normal_description">A simple application for computational materials science.</p>
+        <p class="normal_description">You can make input files easily.</p>
+        <p class="normal_description">You can analyze outputs easily.</p>
+    </div>
+</body>
+</html>
