@@ -32,7 +32,6 @@ def login():
 @app.route('/vasp/', methods=['POST', 'GET'])
 def vasp():
     status = "init"
-
     return render_template("11_vasp.html", status=status)
 
 app.config['VASP_ALLOWED_EXTENSIONS'] = set(["cif","xsd","POSCAR"])
