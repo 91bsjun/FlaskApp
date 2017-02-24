@@ -10,7 +10,9 @@ body{
 
 }
 
-/* top menu css */
+/*************************************************/
+/*                 top menu css                  */
+/*************************************************/
 #top_section {
     width: 100%;
     background-color: #212121;
@@ -92,8 +94,44 @@ body{
     align: center;
 }
 
+/*************************************************/
+/*                  footer css                   */
+/*************************************************/
+footer {
+    clear: both;
+    background-color: #4C4C4C;
+    min-height: 300px;
+}
+.footer_container {
+    clear: both;
+    width: 1210px;
+    margin: 0 auto;
+    padding: 50px 0 50px 0;
+}
+.footer_block {
+    float: left;
+    width: 200px;
+    height: 105px;
+    border-left: thin solid #EAEAEA;
+    margin: 15px 0px 15px 60px;
+    padding-left:40px;
+}
+.footer_block img {
+    display: block;
+    margin: auto;
+}
+.footer_link {
+    text-decoration:none;
+    color: #EAEAEA;
+}
+.footer_link:hover {
+    color: #EAEAEA;
+    font-weight: 700;
+}
 
-/* section css */
+/*************************************************/
+/*                  section css                  */
+/*************************************************/
 .basic_container {
     width: 1210px;
     margin: 0 auto;
@@ -137,9 +175,12 @@ body{
     float: right;
 }
 
-/* file upload css */
+/*************************************************/
+/*               file upload css                 */
+/*************************************************/
 .file_upload {
    width: 70%;
+   min-height: 500px;
 }
 .file_upload .filestyle {
     margin: 5px 0 10px 0;
@@ -147,19 +188,71 @@ body{
 .file_upload #jobname_input {
     float:left;
     width: 70%;
-    margin: 10px 5px 10px 0;
+    margin: 10px 0 10px 0;
 }
 .file_upload #file_submit_btn {
-    float:left;
+    float:right;
     width: 28%;
-    margin: 10px 0 10px 5px;
+    margin: 10px 0 10px 0;
 }
-.file_upload #file_submit_btn:hover {
+
+form .btn-default:hover {
     background-color: #212121;
     color: white;
 }
 
-/* font css */
+/*************************************************/
+/*                   VASP css                    */
+/*************************************************/
+.choose_option ul li a{
+    font-size: 20px;
+    color: #B1B1B1;
+}
+.choose_option h1 {
+    margin-top:35px;
+}
+.choose_option .tab-pane {
+    min-height: 500px;
+}
+.radio_menu ul li {
+    line-height: 30px;
+}
+.radio_menu .yesno li {
+    display:inline-block;
+    font-size: 20px;
+}
+.radio_menu span {
+    margin-left: 10px;
+}
+.show_hide {
+     cursor:pointer;
+     color:black;
+}
+.jobdown {
+    min-height: 600px;
+}
+.jobdown .otherserver {
+    width: 70%;
+}
+.jobdown .cmsuser {
+    width: 70%;
+}
+.otherserver .form-control {
+    width: 60%;
+    margin: 5px 0 5px 0;
+}
+.otherserver #server_ip {
+    float: left;
+    width: 60%;
+}
+.otherserver #server_port {
+    float: right;
+    width: 35%;
+}
+
+/*************************************************/
+/*                   font css                    */
+/*************************************************/
 .large_title {
     font-family: 'Cabin', sans-serif;
     font-size: 72px;
@@ -185,4 +278,17 @@ body{
     font-family: 'Open Sans', sans-serif;
     font-size: 18px;
     margin: 5px 0px 5px 0px;
+}
+.xs_title {
+    font-family: 'Open Sans', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: #EAEAEA;
+    margin: 3px 0 3px 0;
+}
+.xs_description {
+    font-family: 'Open Sans', sans-serif;
+    font-size: 14px;
+    color: #EAEAEA;
+    margin: 3px 0 3px 0;
 }
