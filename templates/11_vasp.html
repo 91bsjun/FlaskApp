@@ -218,7 +218,8 @@
         <div class="choose_option">
             <form method="post" action="{{ url_for('vasp_inputGen') }}">
                 <!--hidden info-->
-                <input type="text" style="display:none"class="form-control" placeholder="Job name" name="jobname" value="{{jobname}}">
+                <input type="text" style="display:none" name="jobname" value="{{jobname}}">
+                <input type="text" style="display:none" name="source_path" value="{{source_path}}">
 
                 <h1 class="medium_title">2. Select input options.</h1>
                 <p class="small_description">Check input options and click "Make Inputs" button.</p><br><br>

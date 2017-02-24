@@ -1,10 +1,12 @@
-import os
+import os, sys
 
 from flask import Flask, render_template, flash, request, url_for, redirect, session, send_from_directory
 from werkzeug import secure_filename
 
-
 app = Flask(__name__)
+app.config['MAX_CONTENT_LENGTH'] = 300 * 1024 * 1024            # limitation of upload length (300mb)
+root_path = "C:\\Users\\bsjun\\Documents\\Codes\\FlaskApp"                   # initial directory
+sys.path.append(root_path)                                      # path for CCpy
 
 # ---------------------------------------------------------------------- #
 #                               Main page                                #
@@ -46,10 +48,18 @@ def vasp_upload():
         username = "bsjun"
     except:
         username = "guest"
-    try:
-        os.mkdir("C:\\Users\\bsjun\\Documents\\Codes\\FlaskApp\\static\\VASP\\" + username)
-    except:
-        pass
+
+    # -------- create and move to directory -------- #
+    os.chdir(root_path)             # pwd : FlaskApp
+    os.chdir("static")              # pwd : FlaskApp/static
+
+    if not os.path.exists("VASP"):
+        os.mkdir("VASP")
+    os.chdir("VASP")                # pwd : FlaskApp/static/VASP
+
+    if not os.path.exists(username):
+        os.mkdir(username)
+    os.chdir(username)              # pwd : FlaskApp/static/VASP/username
 
     # --------------- Check jobname ---------------- #
     jobname = request.form['jobname']
@@ -58,12 +68,10 @@ def vasp_upload():
         return redirect(url_for('vasp'))
 
     # ---------------- File upload ---------------- #
-    source_path = "C:\\Users\\bsjun\\Documents\\Codes\\FlaskApp\\static\\VASP\\" + username + "\\"+jobname
-    try:
-        os.mkdir(source_path)
-    except:
-        pass
-    os.chdir(source_path)
+    if not os.path.exists(jobname):
+        os.mkdir(jobname)
+    os.chdir(jobname)               # pwd         : FlaskApp/static/VASP/username/jobname
+    source_path = os.getcwd()       # source_path : FlaskApp/static/VASP/username/jobname
 
     uploaded_files = request.files.getlist("file[]")
     filenames = []
@@ -75,7 +83,7 @@ def vasp_upload():
 
     status = "file_uploaded"
 
-    return render_template("11_vasp.html", jobname=jobname, filenames=filenames, status=status,
+    return render_template("11_vasp.html", jobname=jobname, filenames=filenames, status=status, source_path=source_path,
                            incar_dict=incar_dict, incar_keys=incar_keys, incar_description_dict=incar_description_dict,
                            magmom_dict=magmom_dict, magmom_keys=magmom_keys,
                            LDAUU_dict=LDAUU_dict, LDAUU_keys=LDAUU_keys)
@@ -136,18 +144,20 @@ def vasp_inputGen():
 
     # ---------------- get job name ---------------- #
     jobname = request.form['jobname']
-    source_path = "C:\\Users\\bsjun\\Documents\\Codes\\FlaskApp\\static\\VASP\\" + username + "\\" + jobname
+    source_path = request.form['source_path']        # source_path : FlaskApp/static/VASP/username/jobname
     os.chdir(source_path)
 
     # ------------ make VASP inputfiles ------------ #
-    from CCpy.VASP.VASPio import VASPInput
+
     input_files = [f for f in os.listdir(source_path) if not os.path.isdir(f)]
+    from CCpy.VASP.VASPio import VASPInput
     for each_input in input_files:
         VI = VASPInput(each_input)
         VI.cms_vasp_set(vdw=grimme_use, mag=magmom_use, ldau=ldau_use,
                         functional=functional,
                         incar_dict=new_incar_dict, magmom_dict=new_magmom_dict, ldau_dict=new_LDAUU_dict,
                         kpoints=kpoints, flask_app=True)
+
 
     status="input_generated"
 
@@ -252,5 +262,4 @@ LDAUJ_keys.sort()
 
 if __name__=="__main__":
 	app.run()
-	# app.run(host="172.30.1.5", port=int("80"))
-    # app.run(host="172.230.44.58", port=int("80"))
+
