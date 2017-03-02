@@ -34,7 +34,15 @@
         .swiper-container p {
             font-size: 28px;
         }
+		
 	</style>
+	<!-- flash message -->
+	<script type="text/javascript">
+		$(document).ready(function(){
+			$("#alert_msg").hide();
+			$("#alert_msg").slideDown();
+		});
+	</script>
 
 </head>
 <header>
@@ -46,8 +54,15 @@
             </div>
             <div class="sideMenu">
                 <ul class="top_ul">
-                    <li><a class="menuLink" href="/login"><span class="glyphicon glyphicon-log-in" aria-hidden="true"  data-toggle="tooltip" data-placement="top" title="Log-in"></span></a></li>
-                    <li><a class="menuLink" href="/register"><span class="glyphicon glyphicon-pencil" aria-hidden="true" data-toggle="tooltip" data-placement="top" title="Register"></span></a></li>
+                    {% if session.logged_in %}
+						<li><a class="menuLink" href="/account"><span class="glyphicon glyphicon-user" aria-hidden="true"  data-toggle="tooltip" data-placement="top" title="Account information"></span></a></li>
+						<li><a class="menuLink" href="/logout"><span class="glyphicon glyphicon-log-out" aria-hidden="true" data-toggle="tooltip" data-placement="top" title="Log-out"></span></a></li>
+						<li><span style="margin-left:5px">User : {{session.username}}</span></li>
+					{% else %}
+						<li><a class="menuLink" href="/login"><span class="glyphicon glyphicon-log-in" aria-hidden="true"  data-toggle="tooltip" data-placement="top" title="Log-in"></span></a></li>
+						<li><a class="menuLink" href="/register"><span class="glyphicon glyphicon-pencil" aria-hidden="true" data-toggle="tooltip" data-placement="top" title="Register"></span></a></li>
+						<li><span style="margin-left:5px">User : Guest</span></li>
+					{%endif%}
                 </ul>
             </div>
             <!--initialize tooltip-->
@@ -121,12 +136,17 @@
 
 <body>
 
-    <div class="basic_container">
-        <h1 class="large_title">Quantum Engine</h1>
-        <button type="button" class="btn btn-default" data-toggle="tooltip" data-placement="left" title="Tooltip on left">Tooltip on left</button>
-        <p class="normal_description">A simple application for computational materials science.</p>
-        <p class="normal_description">You can make input files easily.</p>
-        <p class="normal_description">You can analyze outputs easily.</p>
+    <div class="basic_container" style="height:500px;">
+		{% with messages = get_flashed_messages() %}
+		  {% if messages %}
+			{% for message in messages %}
+			  <div id="alert_msg"class="alert alert-warning alert-dismissible" role="alert">
+			  <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
+				{{message}}
+			  </div>
+			{% endfor %}
+		  {% endif %}
+		{% endwith %}
     </div>
 </body>
 <footer>

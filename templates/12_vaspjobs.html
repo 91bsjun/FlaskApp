@@ -1,0 +1,265 @@
+{% extends "02_header.html" %}
+{% block body %}
+<!-- Banner swiper format -->
+<div class="visual swiper-container">
+    <div class="swiper-wrapper">
+        <div style="background-image:url('/static/images/main/slider1.jpg');" class="swiper-slide">
+            <div>
+                <div>
+                    <h1>VASP Tracker</h1>
+                    <p>You can track your VASP jobs.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>	<!-- /VISUAL -->
+
+<style type="text/css">
+.swiper-container {
+    width: 100%;
+    height: 300px;
+    }
+#alert_msg {
+	width:1200px;
+}
+.choose_job {
+	min-height: 500px;
+	margin-bottom: 50px;
+}
+.handle_job {
+	min-height: 500px;
+	margin-bottom: 50px;
+}
+.db_line {
+	width: 300px;
+}
+.db_select:hover {
+	background-color:#4C4C4C;
+	color:white;
+}
+.db_select {
+	border: 0;
+	background-color: white;
+	height: 50px;
+	width: 100%;
+	text-align: left;
+	padding-left: 20px;
+}
+.db_select .small_description {
+	float: left;
+	width: 200px;
+}
+.table_title {
+	padding-left: 20px;
+}
+.table_title .small_description {
+	float: left;
+	width: 200px;
+	font-weight: 700;
+}
+.db_table .xs_description{
+	color: black;
+	font-size: 16px;
+}
+.db_table td {
+	padding: 0 10px 0 10px;
+}
+.tracker_line:hover {
+	background-color:#EAEAEA;
+	color:white;
+}
+.button_group {
+	text-align: center;
+}
+.button_group .btn-default {
+	width:200px;
+	margin: 0 10px 50px 10px;
+}
+.button_group .btn-default:hover {
+	background-color: #212121;
+	color: white;
+}
+.modal-footer .btn {
+	width: 150px;
+	margin: 0 5px 0 5px;
+}
+.modal-body {
+	height: 300px;
+}
+.modal-body .modal_container {
+	text-align: left;
+	width: 300px;
+	margin: 0 auto;
+}
+.modal-body .xs_title{
+	color: black;
+}
+.normal_dropdown {
+	width: 300px;
+	height: 30px;
+	font-size: 18px;
+}
+</style>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        // status handling
+        var status = "{{status}}"
+        if ("init" == status) {
+            $('.handle_job').hide();
+        } else if ("db_selected" == status) {
+            $('.choose_job').hide();
+        }
+		
+		// check all checkbox
+		$('.check-all').click(function(){
+			$('.dbchk').prop('checked',this.checked);
+		});
+
+		var getSelectedRadios = function (groupName) {
+			//$("input").css('border', '1px solid lightgray');
+			var result = $('input[name="' + groupName + '"]:checked');
+
+			// single point
+			if (result.val() == "sp") {
+				$("#NSW").val("0");
+				$("#NSW").css('border', '1px solid red');
+			} else if (result.val() == "nosp") {
+				$("#NSW").val("200");
+				$("#NSW").css('border', '1px solid red');
+			}
+		};
+
+		// sp click
+		$('input[name="sp"]').click(function () {
+			getSelectedRadios('sp');
+		});
+		
+		$('#calc').click(function (){
+			$('#dbtracker_action').val("calc");		
+		});
+		$('#del_db').click(function (){
+			$('#dbtracker_action').val("del_db");		
+		});
+		$('#del_remote').click(function (){
+			$('#dbtracker_action').val("del_remote");		
+		});
+		$('#update').click(function (){
+			$('#dbtracker_action').val("update");		
+		});
+
+    });
+</script>
+
+<div class="separated_container">
+	{% with messages = get_flashed_messages() %}
+	  {% if messages %}
+		{% for message in messages %}
+		  <div id="alert_msg"class="alert alert-warning alert-dismissible" role="alert">
+		  <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
+			{{message}}
+		  </div>
+		{% endfor %}
+	  {% endif %}
+	{% endwith %}
+    <div class="left_menu">
+        <ul class="left_menu_ul">
+            <a class="left_menu_link" href="/vasp"><li>Input Maker</li></a>
+            <a class="left_menu_link" href="/vaspout"><li>Output Analyzer</li></a>
+            <a class="left_menu_link" href="/vaspjobs" id="current_left_menu"><li>Job Tracker</li></a>
+        </ul>
+    </div>
+    <div class="right_section">
+        <!--1. Upload file-->
+        <div class="choose_job">
+            <h1 class="medium_title">1. Choose your job from DB</h1>			
+			<div class="table_title">
+				<div class="small_description">User</div>	
+				<div class="small_description">Job name</div>
+				<div class="small_description">Items</div>
+				<div class="small_description">Date</div>
+			</div>
+			{% for d in data %}
+			<form method="post" action="{{ url_for('vasp_tracker') }}">
+				<!--hidden info-->
+                <input type="text" style="display:none" name="dbname" value="{{d[1]}}">
+				<div>
+					<button class="db_select">
+						<div class="small_description">{{d[0]}}</div>	
+						<div class="small_description">{{d[1]}}</div>
+						<div class="small_description">{{d[2]}}</div>
+						<div class="small_description">{{d[3]}}</div>
+					</button>
+				</div>
+			</form>
+			{% endfor %}			
+        </div>
+		
+		<!--2. job tracker-->
+		<form method="post" action="{{ url_for('vasp_tracker_action') }}">
+			<!--hidden info-->
+			<input type="text" style="display:none" name="jobname" value="{{jobname}}">
+			<div class="handle_job">
+				<h1 class="medium_title">2. Handle your job.</h1>
+				<table class="db_table">
+					<tr>
+						<td><input type="checkbox" class="check-all"></td>
+						<td><p class="xs_description"><b>Job name</b></p></td>
+						<td><p class="xs_description"><b>Directory path</b></p></td>
+						<td><p class="xs_description"><b>Date</b></p></td>
+						<td><p class="xs_description"><b>Status</b></p></td>
+					</tr>
+					{% for d in data %}				
+					<tr class="tracker_line">
+						<td><input type="checkbox" class="dbchk" name="dbchk" value="{{d[2]}}"></td>
+						<td><p class="xs_description">{{d[1]}}</p></td>
+						<td><p class="xs_description">{{d[2]}}</p></td>
+						<td><p class="xs_description">{{d[3]}}</p></td>
+						<td><p class="xs_description">{{d[4]}}</p></td>
+					</tr>				
+					{% endfor %}
+				</table>
+				<hr>
+				<div class="button_group">
+					<button class="btn btn-default" type="button" id="calc" data-toggle="modal" data-target="#myModal"> Calculate </button>
+						<!-- Modal -->
+						<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+						  <div class="modal-dialog" role="document">
+							<div class="modal-content">
+							  <div class="modal-header">
+								<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+								<h4 class="modal-title" id="myModalLabel"><p class="small_title"> Calculation settings </p></h4>
+								  </div>
+								  <div class="modal-body">
+									<div class="modal_container">
+										<p class="xs_title"> Queue </p>
+										<select class="normal_dropdown" name="queuename">
+										  <option class="dropdown_item" value="xeon1.q">xeon1</option>
+										  <option class="dropdown_item" value="xeon2.q">xeon2</option>
+										  <option class="dropdown_item" value="xeon3.q">xeon3</option>
+										  <option class="dropdown_item" value="xeon4.q">xeon4</option>
+										  <option class="dropdown_item" value="xeon5.q">xeon5</option>
+										</select><br><br>
+										<p class="xs_title"> CPU use </p>
+										<input type="text" id="cpu_use" class="form-control" name="cpu_use" value="24" style="width:300px;"><br><br>
+									</div>
+								  </div>
+								  <div class="modal-footer">
+								<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+								<button type="submit" class="btn btn-default"><b>Calculate</b></button>
+							  </div>
+							</div>
+						  </div>
+						</div>
+					<input class="btn btn-default" type="submit" id="update" value="Update status">
+					<input class="btn btn-default" type="submit" id="del_db" value="Delete DB">
+					<input class="btn btn-default" type="submit" id="del_remote" value="Delete DB and remote">
+				</div>
+			</div>
+			<!--hidden info-->
+            <input type="text" style="display:none" id="dbtracker_action" name="dbtracker_action" value="">
+		</form>
+ 
+    </div>
+</div>
+{% endblock %}

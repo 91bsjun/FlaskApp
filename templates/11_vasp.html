@@ -19,7 +19,9 @@
     width: 100%;
     height: 300px;
     }
-
+#alert_msg {
+	width:1200px;
+}
 </style>
 
 <script type="text/javascript">
@@ -76,6 +78,17 @@
         // hide download methods
         $(".otherserver").hide();
         $(".download_pc").hide();
+		
+		// check CMS users
+		var cmsusers = ["sulee","holee","bsjun","jhson","cms1"];
+		if (cmsusers.indexOf("{{session.username}}") == -1) {
+			$('#cmsuser_radio').attr("disabled",true);
+			$('#cmsuser_radio').prop("checked",false);
+			$('#otherserver_radio').prop("checked",true);
+			$(".otherserver").show();
+			$(".cmsuser").hide();
+			
+		};
 
 		var getSelectedRadios = function (groupName) {
 			//$("input").css('border', '1px solid lightgray');
@@ -194,6 +207,16 @@
 </script>
 
 <div class="separated_container">
+	{% with messages = get_flashed_messages() %}
+	  {% if messages %}
+		{% for message in messages %}
+		  <div id="alert_msg"class="alert alert-warning alert-dismissible" role="alert">
+		  <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
+			{{message}}
+		  </div>
+		{% endfor %}
+	  {% endif %}
+	{% endwith %}
     <div class="left_menu">
         <ul class="left_menu_ul">
             <a class="left_menu_link" href="/vasp" id="current_left_menu"><li>Input Maker</li></a>
@@ -205,12 +228,12 @@
         <!--1. Upload file-->
         <div class="file_upload">
             <h1 class="medium_title">1. Upload your structure file(s).</h1>
-            <p class="small_description">*.cif, *.xsd, POSCAR types are available.</p>
+            <p class="small_description">*.cif, *.xsd(P1 space group), POSCAR types are available.</p>
 
             <form action="vasp_upload" method="post" enctype="multipart/form-data">
                 <input type="file" class="filestyle" multiple="" name="file[]" >
                 <input type="text" id="jobname_input" class="form-control" placeholder="Job name" name="jobname">
-                <input class="btn btn-default" type="submit" value="Load Files" id="file_submit_btn">
+                <input class="btn btn-default loading_btn" type="submit" value="Load Files" id="file_submit_btn">
             </form>
         </div>
 
@@ -408,57 +431,58 @@
                     </div>
                 </div>
                 <hr>
-                <input class="btn btn-default" type="submit" value="Make Inputs" id="inputgen_btn" style="width:150px; margin-bottom:50px">
+                <input class="btn btn-default loading_btn" type="submit" value="Make Inputs" id="inputgen_btn" style="width:150px; margin-bottom:50px">
             </form>
         </div>
 
         <!--3. SCP or Download-->
         <div class="jobdown">
             <form method="post" action="{{ url_for('vasp_input_download') }}">
-                <!--hidden info-->
-                <input type="text" style="display:none"class="form-control" placeholder="Job name" name="jobname" value="{{jobname}}">
+				<!--hidden info-->
+                <input type="text" style="display:none" name="jobname" value="{{jobname}}">
+                <input type="text" style="display:none" name="tar_path" value="{{tar_path}}">
                 <h1 class="medium_title">3. SCP to server.</h1>
                 <p class="small_description">Inputs were generated successfully. Now, send to your server or download them.</p><br>
                 <h1 class="small_title">Select the method.</h1>
                 <div class="radio_menu">
                     <ul>
-                        <li><input type="radio" name="scp_method" class="scp_method" value="cmsuser" checked><span class="small_description">CMS user</span></li>
-                        <li><input type="radio" name="scp_method" class="scp_method" value="otherserver"><span class="small_description">Other server</span></li>
-                        <li><input type="radio" name="scp_method" class="scp_method" value="download"><span class="small_description">Download to PC</span></li>
+                        <li><input type="radio" name="scp_method" class="scp_method" value="cmsuser" id="cmsuser_radio" checked><span class="small_description">CMS user</span></li>
+                        <li><input type="radio" name="scp_method" class="scp_method" value="otherserver" id="otherserver_radio"><span class="small_description">Other server</span></li>
+                        <li><input type="radio" name="scp_method" class="scp_method" value="download" id="download_radio"><span class="small_description">Download to PC</span></li>
                     </ul>
                 </div>
                 <hr>
                 <!--cms user-->
                 <div class="cmsuser">
                     <h1 class="small_title">Directory path of CMS1 server.</h1>
-                    <input type="text" name="cms_target_pass" class="form-control" placeholder="Target full path (ex: /home/username/mydir/)" value="~/QuantumEngine/{{jobname}}">
+                    <input type="text" name="cms_target_pass" class="form-control" placeholder="Target full path (ex: /home/username/mydir/)" value="~/QuantumEngine/VASP/{{jobname}}">
                     <h1 class="small_title">Caution</h1>
                     <p class="small_description">You must log-in as identical id and password of CMS1 server.</p>
                     <p class="small_description">Or not, please use "Other server" menu.</p>
                     <hr>
-                    <input class="btn btn-default" type="submit" value="Generate" style="width:150px; margin-bottom:50px">
+                    <input class="btn btn-default loading_btn" type="submit" value="Generate" style="width:150px; margin-bottom:50px">
                 </div>
                 <!--other server-->
                 <div class="otherserver">
                     <h1 class="small_title">Information of server</h1>
                     <span class="small_description" style="color:red">WE NEVER RECORD YOUR INFORMATIONS.</span>
-                    <input type="text" id="server_ip" name="ip" class="form-control" placeholder="Server address (ex: 144.144.144.14)">
-                    <input type="text" id="server_port" name="port" class="form-control" placeholder="ssh port number (ex: 22)">
+                    <input type="text" id="server_ip" name="server_ip" class="form-control" placeholder="Server address (ex: 144.144.144.14)">
+                    <input type="text" id="server_port" name="server_port" class="form-control" placeholder="ssh port number (ex: 22)">
                     <div style="clear:both">
-                    <input type="text" id="server_id" name="id" class="form-control" placeholder="Username in your server">
+                    <input type="text" id="server_id" name="server_id" class="form-control" placeholder="Username in your server">
                     </div>
                     <div style="clear:both">
-                    <input type="password" id="server_passwd" name="passwd" class="form-control" placeholder="Password">
+                    <input type="password" id="server_passwd" name="server_passwd" class="form-control" placeholder="Password">
                     </div>
                     <h1 class="small_title">Directory path of your server.</h1>
-                    <input type="text" name="target_pass" class="form-control" style="width: 100%" placeholder="Target full path (ex: /home/username/mydir/)" value="~/QuantumEngine/{{jobname}}">
+                    <input type="text" name="target_pass" class="form-control" style="width: 100%" placeholder="Target full path (ex: /home/username/mydir/)" value="~/QuantumEngine/VASP/{{jobname}}">
                     <hr>
-                    <input class="btn btn-default" type="submit" value="Generate" style="width:150px; margin-bottom:50px">
+                    <input class="btn btn-default loading_btn" type="submit" value="Generate" style="width:150px; margin-bottom:50px">
                 </div>
                 <!--download to pc-->
                 <div class="download_pc">
                     <h1 class="small_title">Download inputs to your PC.</h1>
-                    <button class="btn btn-default" style="width:150px; margin-bottom:50px">Download</button>
+                    <a href="{{tar_path}}" download><button type="button" class="btn btn-default" style="width:150px; margin-bottom:50px">Download</button></a>
                 </div>
             </form>
         </div>

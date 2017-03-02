@@ -15,10 +15,34 @@
 </div>	<!-- /VISUAL -->
 <script src="/static/js/swiper.min.js"></script>
 
-<div class="basic_container">
-    <h1 class="large_title">Quantum Engine</h1>
-    <p class="normal_description">A simple application for computational materials science.</p>
-    <p class="normal_description">You can make input files easily.</p>
-    <p class="normal_description">You can analyze outputs easily.</p>
+<div class="basic_container" style="padding:10px 100px 20px 100px; width:600px; margin-top:30px; margin-bottom:30px; background-color:#F6F6F6">
+	{% with messages = get_flashed_messages() %}
+	  {% if messages %}
+		{% for message in messages %}
+		  <div id="alert_msg"class="alert alert-warning alert-dismissible" role="alert">
+		  <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
+			{{message}}
+		  </div>
+		{% endfor %}
+	  {% endif %}
+	{% endwith %}
+	<form class="register_form" method="post" action="{{ url_for('register_action') }}">
+		<p class="small_description">If you are CMS member, it is highly recommended that you set username and password to the same of CMS server. </p>
+		<h1 class="small_title">Username</h1>
+		<p class=".xs_description">At leat 4 charactor required.</p>
+		<input type="text" name="username" class="form-control" value="{{username}}">	
+		<h1 class="small_title">Password</h1>
+		<p class=".xs_description">At leat 6 charactor required.</p>
+		<input type="password" id="passwd" name="password" class="form-control">
+		<h1 class="small_title">Repeat password</h1>
+		<input type="password" id="passwd" name="password_chk" class="form-control">
+		<h1 class="small_title">e-mail address</h1>
+		<input type="text" name="e-mail" class="form-control" value="{{email}}">
+		<h1 class="small_title">Country</h1>
+		<input type="text" name="country" class="form-control">
+		
+		<input class="btn btn-default" type="submit" value="Register" style="float:right; width:150px; margin:15px 0 5px 0">
+		<div style="clear:both"></div>
+	</form>	
 </div>
 {% endblock %}

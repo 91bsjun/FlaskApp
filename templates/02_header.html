@@ -36,12 +36,22 @@
         .swiper-container p {
             font-size: 28px;
         }
-
 	</style>
-
+	<script type="text/javascript">
+		$(document).ready(function(){
+			$("#alert_msg").hide();
+			$("#alert_msg").slideDown();
+			
+			$(".loading_img").hide();
+			$(".loading_btn").click(function() {
+				$(".loading_img").show();
+			});
+		});
+	</script>
 
 </head>
 <header>
+	<div class="loading_img"><img src="/static/images/loading.gif"/></div>
     <!--Top menu-->
     <div id="top_section">
         <div id="top_container">
@@ -50,9 +60,16 @@
             </div>
             <div class="sideMenu">
                 <ul class="top_ul">
-                    <li><a class="menuLink" href="/login"><span class="glyphicon glyphicon-log-in" aria-hidden="true"  data-toggle="tooltip" data-placement="top" title="Log-in"></span></a></li>
-                    <li><a class="menuLink" href="/register"><span class="glyphicon glyphicon-pencil" aria-hidden="true" data-toggle="tooltip" data-placement="top" title="Register"></span></a></li>
-                </ul>
+					{% if session.logged_in %}
+						<li><a class="menuLink" href="/account"><span class="glyphicon glyphicon-user" aria-hidden="true"  data-toggle="tooltip" data-placement="top" title="Account information"></span></a></li>
+						<li><a class="menuLink" href="/logout"><span class="glyphicon glyphicon-log-out" aria-hidden="true" data-toggle="tooltip" data-placement="top" title="Log-out"></span></a></li>
+						<li><span style="margin-left:5px">User : {{session.username}}</span></li>
+					{% else %}
+						<li><a class="menuLink" href="/login"><span class="glyphicon glyphicon-log-in" aria-hidden="true"  data-toggle="tooltip" data-placement="top" title="Log-in"></span></a></li>
+						<li><a class="menuLink" href="/register"><span class="glyphicon glyphicon-pencil" aria-hidden="true" data-toggle="tooltip" data-placement="top" title="Register"></span></a></li>
+						<li><span style="margin-left:5px">User : Guest</span></li>
+					{%endif%}
+				</ul>
             </div>
             <!--initialize tooltip-->
             <script type="text/javascript">
