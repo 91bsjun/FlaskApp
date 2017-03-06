@@ -1,0 +1,119 @@
+{% extends "02_header.html" %}
+{% block body %}
+<!-- Banner swiper format -->
+<div class="visual swiper-container">
+    <div class="swiper-wrapper">
+        <div style="background-image:url('/static/images/main/slider1.jpg');" class="swiper-slide">
+            <div>
+                <div>
+                    <h1>Strain Maker</h1>
+                    <p>You can make strained strucure files.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>	<!-- /VISUAL -->
+
+<style type="text/css">
+.swiper-container {
+    width: 100%;
+    height: 300px;
+    }
+#alert_msg {
+	width:1200px;
+}
+.lat_table {
+	width: 100%;
+}
+.lat_table tr {
+	height: 50px;
+}
+.lat_table td {
+	padding: 0 10px 0 10px;
+	text-align: center;
+}
+.lat_table .form-control {
+	width: 200px;
+}
+</style>
+
+
+
+<div class="separated_container">
+	{% with messages = get_flashed_messages() %}
+	  {% if messages %}
+		{% for message in messages %}
+		  <div id="alert_msg"class="alert alert-warning alert-dismissible" role="alert">
+		  <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
+			{{message}}
+		  </div>
+		{% endfor %}
+	  {% endif %}
+	{% endwith %}
+    <div class="left_menu">
+        <ul class="left_menu_ul">
+            <a class="left_menu_link" href="/lattice_strain" id="current_left_menu"><li>Strain Maker</li></a>
+            <a class="left_menu_link" href="/vaspout"><li>File Converter</li></a>
+            <a class="left_menu_link" href="/vaspjobs"><li>VASP Plotter</li></a>
+        </ul>
+    </div>
+    <div class="right_section">
+        <!--1. Upload file-->
+        <div class="file_upload">            
+            <form action="strain_upload" method="post" enctype="multipart/form-data">
+				<h1 class="medium_title">1. Load your structure file(s).</h1>
+				<p class="small_description">*.cif, POSCAR types are available.</p>
+                <input type="file" class="filestyle" multiple="" name="file[]" >
+                <input class="btn btn-default loading_btn" type="submit" value="Load Files" id="file_submit_btn">
+				<div style="clear:both"></div>
+				<h1 class="medium_title">2. Choose strain options.</h1>
+				<table class="lat_table">
+					<tr>
+						<td> <p class="small_description"> Item </p> </td>
+						<td> <p class="small_description"> Max-compressive (%) </p></td>
+						<td> <p class="small_description"> Max-tensile (%) </p></td>
+						<td> <p class="small_description"> Interval </p></td>
+					</tr>
+					<tr>
+						<td> <p class="small_description"> a </p></td>
+						<td> <input type="text" class="form-control" placeholder="-15" name="mina"> </td>
+						<td> <input type="text" class="form-control" placeholder="15" name="maxa"> </td>
+						<td> <input type="text" class="form-control" placeholder="5" name="ina"> </td>
+					</tr>
+					<tr>
+						<td> <p class="small_description"> b </p></td>
+						<td> <input type="text" class="form-control" placeholder="-15" name="minb"> </td>
+						<td> <input type="text" class="form-control" placeholder="15" name="maxb"> </td>
+						<td> <input type="text" class="form-control" placeholder="5" name="inb"> </td>
+					</tr>
+					<tr>
+						<td> <p class="small_description"> c </p></td>
+						<td> <input type="text" class="form-control" placeholder="-15" name="minc"> </td>
+						<td> <input type="text" class="form-control" placeholder="15" name="maxc"> </td>
+						<td> <input type="text" class="form-control" placeholder="5" name="inc"> </td>
+					</tr>
+					<tr>
+						<td> <p class="small_description"> alpha </p></td>
+						<td> <input type="text" class="form-control" placeholder="-15" name="minal"> </td>
+						<td> <input type="text" class="form-control" placeholder="15" name="maxal"> </td>
+						<td> <input type="text" class="form-control" placeholder="5" name="inal"> </td>
+					</tr>
+					<tr>
+						<td> <p class="small_description"> beta </p></td>
+						<td> <input type="text" class="form-control" placeholder="-15" name="minbe"> </td>
+						<td> <input type="text" class="form-control" placeholder="15" name="maxbe"> </td>
+						<td> <input type="text" class="form-control" placeholder="5" name="inbe"> </td>
+					</tr>
+					<tr>
+						<td> <p class="small_description"> gamma </p></td>
+						<td> <input type="text" class="form-control" placeholder="-15" name="minga"> </td>
+						<td> <input type="text" class="form-control" placeholder="15" name="maxga"> </td>
+						<td> <input type="text" class="form-control" placeholder="5" name="inga"> </td>
+					</tr>
+				</table>
+            </form>
+        </div>
+ 
+    </div>
+</div>
+{% endblock %}

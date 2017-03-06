@@ -3,7 +3,7 @@
 <!-- Banner swiper format -->
 <div class="visual swiper-container">
     <div class="swiper-wrapper">
-        <div style="background-image:url('/static/images/main/slider1.jpg');" class="swiper-slide">
+        <div style="background-image:url('/static/images/banners/register_banner.jpg');" class="swiper-slide">
             <div>
                 <div>
                     <h1>Register</h1>
@@ -14,8 +14,32 @@
     </div>
 </div>	<!-- /VISUAL -->
 <script src="/static/js/swiper.min.js"></script>
+<style type="text/css">
+	.swiper-container {
+		width: 100%;
+		height: 300px;
+	}
+	.form_div {
+		margin: 0 auto;
+	}
+	.register_form {
+		width: 500px;
+		margin: 0 auto;
+	}
+	.register_form .small_description {
+		font-size: 18px;
+	}
+	.form_div .xs_description {
+		color: black;
+		font-size: 14px;
+	}
+	.login_input {
+		width: 400px;
+		margin-bottom:15px;
+	}
+</style>
 
-<div class="basic_container" style="padding:10px 100px 20px 100px; width:600px; margin-top:30px; margin-bottom:30px; background-color:#F6F6F6">
+<div class="basic_container" style="padding:10px 50px 20px 50px; width:800px; margin-top:30px; margin-bottom:30px; border:solid gray">
 	{% with messages = get_flashed_messages() %}
 	  {% if messages %}
 		{% for message in messages %}
@@ -26,23 +50,35 @@
 		{% endfor %}
 	  {% endif %}
 	{% endwith %}
-	<form class="register_form" method="post" action="{{ url_for('register_action') }}">
-		<p class="small_description">If you are CMS member, it is highly recommended that you set username and password to the same of CMS server. </p>
-		<h1 class="small_title">Username</h1>
-		<p class=".xs_description">At leat 4 charactor required.</p>
-		<input type="text" name="username" class="form-control" value="{{username}}">	
-		<h1 class="small_title">Password</h1>
-		<p class=".xs_description">At leat 6 charactor required.</p>
-		<input type="password" id="passwd" name="password" class="form-control">
-		<h1 class="small_title">Repeat password</h1>
-		<input type="password" id="passwd" name="password_chk" class="form-control">
-		<h1 class="small_title">e-mail address</h1>
-		<input type="text" name="e-mail" class="form-control" value="{{email}}">
-		<h1 class="small_title">Country</h1>
-		<input type="text" name="country" class="form-control">
-		
-		<input class="btn btn-default" type="submit" value="Register" style="float:right; width:150px; margin:15px 0 5px 0">
-		<div style="clear:both"></div>
-	</form>	
+	<div class="form_div" style="margin:0 auto">
+		<p class="small_title" style="text-align:center">Please fill out the information.</p>
+		<hr>
+		<p class="xs_description">If you are <b>CMS member</b>, username and password should be matched with CMS1 server.</p>
+		<form method="post" action="{{ url_for('register_action') }}">
+			<div class="register_form">
+				<p class="small_description">Username</p>
+				<input type="text" name="username" class="login_input" value="{{username}}" data-toggle="tooltip" data-placement="right" title="at least 4 charactors required">
+
+				<p class="small_description">Password</p>
+				<input type="password" id="passwd" name="password" class="login_input" data-toggle="tooltip" data-placement="right" title="at least 6 charactors required">
+
+				<p class="small_description">Password confirm</p>
+				<input type="password" id="passwd" name="password_chk" class="login_input">
+
+				<p class="small_description">e-mail address</p>
+				<input type="text" name="e-mail" class="login_input" value="{{email}}">
+				<p class="xs_description"></p>
+
+				<p class="small_description">Country</p>
+				<input type="text" name="country" class="login_input">
+				<p class="xs_description">
+			</div>
+			<hr>
+			<div style="margin:0 auto; text-align:center">
+			<a href="/"><button class="btn btn-default" type="button" style="width:150px; margin: 5px">Cancel</button></a>
+			<input class="btn btn-default" type="submit" value="Register" style="width:150px; margin: 5px">
+			</div>
+		</form>
+	</div>
 </div>
 {% endblock %}

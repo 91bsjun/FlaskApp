@@ -22,6 +22,7 @@ app.config['MAX_CONTENT_LENGTH'] = 300 * 1024 * 1024                     # limit
 root_path = "/var/www/QuantumEngine/FlaskApp"                            # initial directory
 sys.path.append(root_path)                                               # append FlaskApp path
 
+
 # -- CCpy modules
 from CCpy.Tools.CCpyTools import linux_command as lc
 from CCpy.Tools.CCpyTools import ssh_command, ssh_send_file, ssh_send_directory
@@ -35,7 +36,7 @@ def homepage():
     try:
         username=session['username']
     except:
-        username="not login"
+        username="guest"
     return render_template("01_main.html", username=username)
 
 
@@ -81,12 +82,12 @@ def logout():
 # ---------------------------------------------------------------------- #
 #                           Register page                                #
 # ---------------------------------------------------------------------- #
-@app.route('/register', methods = ["GET","POST"])
+@app.route('/register/', methods = ["GET","POST"])
 def register():
 
     return render_template("04_register.html")
 
-@app.route('/register_action', methods = ["GET","POST"])
+@app.route('/register_action/', methods = ["GET","POST"])
 def register_action():
     # ---------------- get informations ---------------- #
     username = request.form['username']
@@ -131,7 +132,7 @@ def register_action():
 # ---------------------------------------------------------------------- #
 #                      Account management page                           #
 # ---------------------------------------------------------------------- #
-@app.route('/account', methods = ["GET","POST"])
+@app.route('/account/', methods = ["GET","POST"])
 def account():
     try:
         username = session['username']
@@ -146,7 +147,7 @@ def account():
     email, country = data[2], data[3]
     return render_template("05_account.html", username=username, email=email, country=country)
 
-@app.route('/account_action', methods = ["GET","POST"])
+@app.route('/account_action/', methods = ["GET","POST"])
 def account_action():
     # ---------------- get informations ---------------- #
     username = session['username']
@@ -182,7 +183,12 @@ def account_action():
         flash("Account information have been editted.")
         return redirect(url_for('account'))
 
-
+# ---------------------------------------------------------------------- #
+#                         ERROR handle page                              #
+# ---------------------------------------------------------------------- #
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template("404.html")
 
 # ---------------------------------------------------------------------- #
 #                          VASP Input page                               #
@@ -191,16 +197,12 @@ def account_action():
 @app.route('/vasp/', methods=['POST', 'GET'])
 def vasp():    
     status = "init"
-    # ---------------- get username ---------------- #
-    try:
-        username = session['username']
-    except:
-        username = "guest"
+    username = get_username()
 
     # -------------- clear directory --------------- #
     if username != "guest":
         os.chdir(root_path)
-        lc("rm -rf ./static/VASP/"+ username +"/*")
+        lc("cd ./static/VASP/"+ username +";find . ! -name \"vasp_queue.sh\" -delete")
 
     return render_template("11_vasp.html", status=status)
 
@@ -214,11 +216,7 @@ def vasp_allowed_file(filename):
 # VASP input option setting page
 @app.route('/vasp/vasp_upload', methods=['POST', 'GET'])
 def vasp_upload():
-    # ---------------- get username ---------------- #
-    try:
-        username = session['username']
-    except:
-        username = "guest"
+    username = get_username()
 
     # -------- create and move to directory -------- #
     os.chdir(root_path)             # pwd : FlaskApp
@@ -266,13 +264,9 @@ def vasp_upload():
                            LDAUU_dict=LDAUU_dict, LDAUU_keys=LDAUU_keys)
 
 # VASP get input options and make input sets
-@app.route('/vaspinputgen', methods=['POST', 'GET'])
+@app.route('/vaspinputgen/', methods=['POST', 'GET'])
 def vasp_inputGen():
-    # ---------------- get username ---------------- #
-    try:
-        username = session['username']
-    except:
-        username = "guest"
+    username = get_username()
 
     # --------------- get INCAR dict --------------- #
     new_incar_dict = {}
@@ -349,6 +343,8 @@ def vasp_inputGen():
 # VASP generated inputs download page
 @app.route('/vaspdownload/', methods=['POST', 'GET'])
 def vasp_input_download():
+    username = get_username()
+    
     jobname = request.form['jobname']
     tar_path = request.form['tar_path']             # /static/VASP/username/jobname/jobname.tar.gz
     tarfile = tar_path.split("/")[-1]
@@ -359,19 +355,19 @@ def vasp_input_download():
     if method_radio == "cmsuser":
         servername = "166.104.249.31"
         portnum = "7001"
-        username = session['username']
-        password = session['password']
+        susername = session['username']
+        spassword = session['password']
         target_path = request.form['cms_target_pass']        
     elif method_radio == "otherserver":
         servername = request.form['server_ip']
         portnum = request.form['server_port']
-        username = request.form['server_id']
-        password = request.form['server_passwd']
+        susername = request.form['server_id']
+        spassword = request.form['server_passwd']
         target_path = request.form['target_pass']
 
-    ssh_command(servername,portnum,username,password,"mkdir -p "+target_path)
-    ssh_send_file(servername,portnum,username,password,tar_fullpath,target_path)
-    ssh_command(servername,portnum,username,password,"cd "+target_path+";tar zxvf "+tarfile+";rm "+tarfile)
+    ssh_command(servername,portnum,susername,spassword,"mkdir -p "+target_path)
+    ssh_send_file(servername,portnum,susername,spassword,tar_fullpath,target_path)
+    ssh_command(servername,portnum,susername,spassword,"cd "+target_path+";tar zxvf "+tarfile+";rm "+tarfile)
     flash("Your Job: " + jobname + " was successfully transfered to "+target_path)
     
     # --------- Add to DB (VASPtracker) ---------- #
@@ -399,20 +395,17 @@ def vasp_input_download():
         c.execute("INSERT INTO VASPjobs (username, jobname, items, date) VALUES (%s,%s,%s,%s)",
                   (thwart(username), thwart(jobname), thwart(items), thwart(now)))
     
-    return redirect(url_for('vasp'))
+    return redirect(url_for('vaspjobs'))
 
 
 # ---------------------------------------------------------------------- #
-#                          VASP Input page                               #
+#                         VASP Tracker page                              #
 # ---------------------------------------------------------------------- #
 # VASP tracker main page
 @app.route('/vaspjobs/', methods=['POST', 'GET'])
 def vaspjobs():
-    # ---------------- get username ---------------- #
-    try:
-        username = session['username']
-    except:
-        username = "guest"
+    username = get_username()
+    
     c, conn = connection()
     ex = c.execute("SELECT * FROM VASPjobs WHERE username = (%s)",
                      (thwart(username)))
@@ -423,13 +416,24 @@ def vaspjobs():
     status = "init"
     return render_template("12_vaspjobs.html", data=data, status=status)
 
+@app.route('/vaspdbclear/', methods=['POST', 'GET'])
+def vasp_db_clear():
+    username = get_username()
+
+    c, conn = connection()
+    ex = c.execute("DELETE FROM VASPjobs WHERE username=(%s) AND items=0",
+                   (thwart(username)))
+
+    flash("Empty DB have been cleared.")
+    return redirect(url_for('vaspjobs'))
+    
+            
+
+    
 @app.route('/vasptracker/', methods=['POST', 'GET'])
 def vasp_tracker(jobname=None):
-    # ---------------- get username ---------------- #
-    try:
-        username = session['username']
-    except:
-        username = "guest"
+    username = get_username()
+    cmsuser = cms_user(username)
 
     # --------- get DBs from VASP tracker ----------#
     if jobname:
@@ -447,20 +451,32 @@ def vasp_tracker(jobname=None):
     c.execute("UPDATE VASPjobs SET items=(%s) WHERE username=(%s) AND jobname=(%s)",
                   (thwart(str(ex)), thwart(username), thwart(jobname)))
 
+    # --------- get latest queue script ----------- #
+    try:
+        priv_qscript = open(root_path+"/static/VASP/"+username+"/vasp_queue.sh", "r").read()
+    except:
+        priv_qscript = ""
+
     status = "db_selected"
-    return render_template("12_vaspjobs.html", jobname=jobname, data=data, status=status)
+    return render_template("12_vaspjobs.html", cmsuser=cmsuser,
+                           sge_qscript=sge_qscript, pbs_qscript=pbs_qscript, priv_qscript=priv_qscript,
+                           jobname=jobname, data=data, status=status)
 
 @app.route('/vasptracker_action/', methods=['POST', 'GET'])
 def vasp_tracker_action():
-    # ---------------- get username ---------------- #
-    try:
-        username = session['username']
-        password = session['password']
-    except:
-        username = "guest"
-
-    servername = "166.104.249.249"
-    portnum = "7001"
+    # -------------- get serverinfo --------------- #
+    username = get_username()
+    cmsuser = cms_user(username)
+    if cmsuser:
+        servername = "166.104.249.249"
+        portnum = "7001"
+        susername = username
+        spassword = session['password']
+    else:
+        servername = request.form['server_ip']
+        portnum = request.form['server_port']
+        susername = request.form['server_id']
+        spassword = request.form['server_passwd']
 
     checked = request.form.getlist('dbchk')
     action = request.form['dbtracker_action']
@@ -478,7 +494,7 @@ def vasp_tracker_action():
                            (thwart(dir_path), thwart(username)))
             del_items += 1
         # -- remove remote path
-        ssh_command(servername,portnum,username,password,"rm -rf "+targets)
+        ssh_command(servername,portnum,susername,spassword,"rm -rf "+targets)
         flash(targets+" were removed from DB and remote successfully.")
 
         # -- update items in VASPjobs
@@ -497,26 +513,50 @@ def vasp_tracker_action():
         return vasp_tracker(jobname=jobname)
     # ------------- Do calculation  -------------- #
     elif action == "calc":
-        from mpiScript import VASP
-        queue = request.form['queuename']
-        cpu = request.form['cpu_use']
-        os.chdir(root_path+"/static/VASP/"+username)
-        for dir_path in checked:            
-            jobname = dir_path.split("/")[-1]
-            # -- create submit script
-            mpi = VASP(cpu, jobname, queue, dir_path)
-            mpi_filename = "QEVASP.mpi.sh"
+        if cmsuser:
+            from mpiScript import VASP
+            queue = request.form['queuename']
+            cpu = request.form['cpu_use']
+            os.chdir(root_path+"/static/VASP/"+username)
+            for dir_path in checked:            
+                jobname = dir_path.split("/")[-1]
+                # -- create submit script
+                mpi = VASP(cpu, jobname, queue, dir_path)
+                mpi_filename = "vasp_queue.sh"
+                f = open(mpi_filename,"w")
+                f.write(mpi)
+                f.close()
+                # -- send to server
+                ssh_send_file(servername,portnum,susername,spassword,mpi_filename,dir_path)
+                ssh_command(servername,portnum,susername,spassword,"cd "+dir_path+";qsub "+mpi_filename)
+                # -- update DB status
+                c.execute("UPDATE VASPtracker SET status=(%s) WHERE username=(%s) AND path=(%s)",
+                          (thwart("Submitted"), thwart(username), thwart(dir_path)))
+            flash("Job submitted.")
+            return vasp_tracker(jobname=jobname)
+        else:
+            qsys = request.form['qsys']
+            mpi = request.form[qsys]
+            mpi = mpi.replace("\r","")
+            qsub = request.form['qsub_path']
+            mpi_filename = "vasp_queue.sh"
+            os.chdir(root_path+"/static/VASP/"+username)
+            # -- make queue script
             f = open(mpi_filename,"w")
             f.write(mpi)
             f.close()
-            # -- send to server
-            ssh_send_file(servername,portnum,username,password,mpi_filename,dir_path)
-            ssh_command(servername,portnum,username,password,"cd "+dir_path+";qsub "+mpi_filename)
-            # -- update DB status
-            c.execute("UPDATE VASPtracker SET status=(%s) WHERE username=(%s) AND path=(%s)",
-                      (thwart("Submitted"), thwart(username), thwart(dir_path)))
-        flash("Job submitted.")
-        return vasp_tracker(jobname=jobname)
+            for dir_path in checked:                
+                # -- send to server
+                ssh_send_file(servername,portnum,susername,spassword,mpi_filename,dir_path)
+                ssh_command(servername,portnum,susername,spassword,"cd "+dir_path+";"+qsub+" "+mpi_filename)
+                # -- update DB status
+                c.execute("UPDATE VASPtracker SET status=(%s) WHERE username=(%s) AND path=(%s)",
+                          (thwart("Submitted"), thwart(username), thwart(dir_path)))
+            flash("Job submitted.")
+            # -- create last submit script
+            
+            return vasp_tracker(jobname=jobname)
+                
 
     elif action == "update":
         from paramiko import SSHClient,AutoAddPolicy
@@ -524,7 +564,7 @@ def vasp_tracker_action():
         client = SSHClient()                                                            
         client.load_system_host_keys()       
         client.set_missing_host_key_policy(AutoAddPolicy())
-        client.connect(servername, port=int(portnum), username=username, password=password)
+        client.connect(servername, port=int(portnum), username=susername, password=spassword)
 
         for dir_path in checked:
             stdin, stdout, stderr = client.exec_command('ls '+dir_path)
@@ -542,7 +582,7 @@ def vasp_tracker_action():
                             status = "Finished"
                         else:
                             status = "Running / Error terminated"
-                elif "POSCAR" in out and "POTCAR" in out and "KPOINTS" in out and "INCAR" in out and "QEVASP.mpi.sh" in out:
+                elif "POSCAR" in out and "POTCAR" in out and "KPOINTS" in out and "INCAR" in out and "vasp_queue.sh" in out:
                     status = "Submitted"
                 elif "POSCAR" in out and "POTCAR" in out and "KPOINTS" in out and "INCAR" in out:
                     status = "Ready"
@@ -557,12 +597,75 @@ def vasp_tracker_action():
 
 
 
+# ---------------------------------------------------------------------- #
+#                         Strain Maker page                              #
+# ---------------------------------------------------------------------- #
+@app.route('/lattice_strain/', methods=['POST', 'GET'])
+def strain():
+    username = get_username()
+    if os.path.exists(root_path+"/static/Strain/"username):
+        os.chdir(root_path+"/static/Strain/"username)
+        lc("rm -rf ./*")
+    
+    return render_template("21_strain.html")
 
+app.config['STRAIN_ALLOWED_EXTENSIONS'] = set(["cif","POSCAR","CONTCAR"])
+def strain_allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1] in app.config['STRAIN_ALLOWED_EXTENSIONS']
 
+@app.route('/lattice_strain/strain_upload', methods=['POST', 'GET'])
+def strain_upload():
+    username = get_username()
 
+    # -------- create and move to directory -------- #
+    os.chdir(root_path)             # pwd : FlaskApp
+    os.chdir("static")              # pwd : FlaskApp/static
 
+    if not os.path.exists("Strain"):
+        os.mkdir("Strain")
+    os.chdir("Strain")              # pwd : FlaskApp/static/Strain
 
+    if not os.path.exists(username):
+        os.mkdir(username)
+    os.chdir(username)              # pwd : FlaskApp/static/Strain/username
 
+    uploaded_files = request.files.getlist("file[]")
+    filenames = []
+    for file in uploaded_files:
+        if file and strain_allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            file.save(os.path.join("./", filename))
+            filenames.append(filename)
+    if len(filenames) == 0:
+        flash("You probably have uploaded an incorrect file format. Please, try again.")
+        return redirect(url_for('strain'))
+
+    sa = [request.form['mina'],request.form['maxa'],request.form['ina']]
+    sb = [request.form['minb'],request.form['maxb'],request.form['inb']]
+    sc = [request.form['minc'],request.form['maxc'],request.form['inc']]
+    saa = [request.form['minal'],request.form['maxal'],request.form['inal']]
+    sbb = [request.form['minbe'],request.form['maxbe'],request.form['inbe']]
+    scc = [request.form['minga'],request.form['maxga'],request.form['inga']]
+
+    items = [sa,sb,sc,saa,sbb,scc]
+    for i in range(len(items)):
+        if items[i][2] == 0:
+            items[i] = False
+        else:
+            for j in items[i]:
+                if j == "":
+                    items[i] = False
+
+    from CCpy.Tools.CCpyTools import lattice_strain
+    for f in filenames:
+        dirname = f+"_strain"
+        os.mkdir(dirname)
+        os.chdir(dirname)
+        lattice_strain(filename="../"+f,sa=items[0],sb=items[1],sc=items[2],saa=items[3],sbb=items[4],scc=items[5])
+        os.chdir("../")
+        lc("tar -zcvf "+dirname+".tar.gz "+dirname)
+    return render_template("21_strain.html")
 
 incar_dict = {
     "NWRITE":2,"LPETIM":"F","ISTART":0,"INIWAV":1,"IWAVPR":1,"ICHARG":2,"LCHARG":".TRUE.","LWAVE":".FALSE.",
@@ -639,6 +742,59 @@ LDAUJ_dict = {'Mo': 0, 'V': 0, 'Cu': 0, 'W': 0, 'Ag': 0, 'Cr': 0, 'Ta': 0,
 LDAUJ_keys = list(LDAUJ_dict.keys())
 LDAUJ_keys.sort()
 
+sge_qscript = """#!/bin/csh
+#---- pe request ----#
+#$ -pe mpi_24 24
+
+#------ Jobname -----#
+#$ -N myjobname
+
+#$ -S /bin/csh
+
+#---- Queue name ----#
+#$ -q my.q
+
+#$ -V
+
+#$ -cwd
+
+cat $TMPDIR/machines
+
+   cd $SGE_O_WORKDIR
+   
+   #--- edit mpirun path and VASP path ---#
+   mpirun -np $NSLOTS /opt/vasp/vasp.5.4.1/bin/vasp
+"""
+
+pbs_qscript = """#!/bin/sh
+#PBS -N qtst
+#PBS -q batch
+#PBS -l nodes=1:ppn=24
+
+EXE="/opt/vasp/vasp.5.4.1/bin/vasp"
+
+NUMBER=`wc -l < $PBS_NODEFILE`
+
+cd $PBS_O_WORKDIR
+
+mpirun -machinefile $PBS_NODEFILE -np $NUMBER $EXE
+"""
+
+def get_username():
+    try:
+        username = session['username']
+    except:
+        username = "guest"
+
+    return username
+
+def cms_user(username):
+    cms_users = ["sulee", "holee", "bsjun", "jhson", "cms1"]
+    if username in cms_users:
+        return True
+    else:
+        return False
+    
 if __name__=="__main__":
 	app.run()
 

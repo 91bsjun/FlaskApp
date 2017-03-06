@@ -1,0 +1,45 @@
+{% extends "02_header.html" %}
+{% block body %}
+<!-- Banner swiper format -->
+<div class="visual swiper-container">
+    <div class="swiper-wrapper">
+        <div style="background-image:url('/static/images/main/slider1.jpg');" class="swiper-slide">
+            <div>
+                <div>
+                    <h1>Page Not Found(404)</h1>
+                    <p></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>	<!-- /VISUAL -->
+<script src="/static/js/swiper.min.js"></script>
+<style type="text/css">
+	.swiper-container {
+		width: 100%;
+		height: 300px;
+	}
+	.form_div {
+		margin: 0 auto;
+	}
+	.register_form {
+		width: 500px;
+		margin: 0 auto;
+	}
+	.register_form .small_description {
+		font-size: 18px;
+	}
+	.form_div .xs_description {
+		color: black;
+		font-size: 14px;
+	}
+	.login_input {
+		width: 400px;
+		margin-bottom:15px;
+	}
+</style>
+
+<div class="basic_container" style="height:600px">
+	<p class="large_title">Sorry! This page is not ready.</p>
+</div>
+{% endblock %}

@@ -97,16 +97,24 @@
             <div style="background-image:url('/static/images/main/slider2.jpg');" class="swiper-slide">
                 <div>
                     <div>
-                        <h1>Generate Inputs</h1>
-                        <p>You can generate some inputfiles easily on the web.</p>
+                        <h1>Generate Input Files</h1>
+                        <p>You can easily make inputfiles on the web.</p>
                     </div>
                 </div>
             </div>
-            <div style="background-image:url('/static/images/main/slider1.jpg');" class="swiper-slide">
+            <div style="background-image:url('/static/images/main/slider3.jpg');" class="swiper-slide">
                 <div>
                     <div>
                         <h1>Management Jobs</h1>
-                        <p>You can monitor jobs on the web.</p>
+                        <p>You can monitor jobs DB on the web.</p>
+                    </div>
+                </div>
+            </div>
+			<div style="background-image:url('/static/images/main/slider4.jpg');" class="swiper-slide">
+                <div>
+                    <div>
+                        <h1>Electroninc Structure Plotter</h1>
+                        <p>You can plot electroninc structures from VASP calculation.</p>
                     </div>
                 </div>
             </div>
@@ -135,8 +143,7 @@
 </header>
 
 <body>
-
-    <div class="basic_container" style="height:500px;">
+    <div class="basic_container">
 		{% with messages = get_flashed_messages() %}
 		  {% if messages %}
 			{% for message in messages %}
@@ -147,6 +154,25 @@
 			{% endfor %}
 		  {% endif %}
 		{% endwith %}
+		<p class="large_title">Welcome to Quantum Engine.</p>
+		<p class="large_description">			
+			Quantum Engine is a simple and light web application for computational science.
+			We provide the process of generating input files on the web GUI. 
+			And you can transfer to your server or download to your PC.
+			When you transferred to your server, they are stored to our jobs DB. 
+			And then, you can submit the jobs to your server and tracking your jobs.
+		</p>
+		<div><img src="/static/images/main/qeprocess.jpg" style="width:100%"/></div>
+		<p class="large_title">VASP Tools</p>
+		<p class="large_description">			
+			You can make VASP input sets(INCAR, POSCAR, PROCAR, KPOINTS) on the web.<br>
+			User can edit the specific values of input files easily. 
+			After you generate input sets, you can control your jobs using our Job DB system.
+		</p>
+		<div style="text-align:center">
+			<a href="/vasp"><button class="main_btn"> VASP Input Maker </button></a>
+			<a href="/vaspjobs"><button class="main_btn"> VASP Jobs Tracker </button></a>
+		</div>
     </div>
 </body>
 <footer>
@@ -168,9 +194,10 @@
         </div>
         <div class="footer_block">
             <p class="xs_title"><b>Tools</b></p>
-            <p class="xs_description">Converter</p>
-            <p class="xs_description">Band plotter</p>
-            <p class="xs_description">DOS plotter</p>
+			<p class="xs_description"><a href="/lattice_strain" class="footer_link">Strain maker<a></p>
+            <p class="xs_description">File converter</p>
+            <p class="xs_description">VASP plotter</p>
+            
         </div>
         <div class="footer_block">
             <p class="xs_title"><b>Jobs</b></p>
